@@ -139,9 +139,3 @@ def get_captain_team(msgid, captain):
     ])
     for i in b:
         return i['name']
-
-
-def test():
-    print(get_player_team(123123123, 124))
-
-test()
