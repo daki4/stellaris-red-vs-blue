@@ -79,34 +79,36 @@ def get_initial_players(msgid):
 
 
 def get_player_team(msgid, player):
-    b = game_col.aggregate([
-    {
-        '$match': {
-        '_id': msgid
-        }
-    },
-    {
-        '$replaceRoot': {
-            'newRoot': {
-                '$first': {
-                    '$filter': {
-                        'input': '$teams',
-                        'as': 'team',
-                        'cond': {
-                        '$in': [
-                            player,
-                            '$$team.players'
-                            ]
+    try:
+        b = game_col.aggregate([
+        {
+            '$match': {
+            '_id': msgid
+            }
+        },
+        {
+            '$replaceRoot': {
+                'newRoot': {
+                    '$first': {
+                        '$filter': {
+                            'input': '$teams',
+                            'as': 'team',
+                            'cond': {
+                                '$in': [
+                                    player,
+                                    '$$team.players'
+                                ]
+                            }
                         }
                     }
                 }
             }
         }
-    }
-    ])
-    for i in b:
-        return i['name']
-
+        ])
+        for i in b:
+            return i['name']
+    except Exception as e:
+        print(e)
 
 def get_captain_team(msgid, captain):
 
@@ -124,9 +126,9 @@ def get_captain_team(msgid, captain):
                         'input': '$teams',
                         'as': 'team',
                         'cond': {
-                        '$eq': [
-                            '$$team.captain',
-                            captain
+                            '$eq': [
+                                '$$team.captain',
+                                captain
                             ]
                         }
                     }
@@ -140,4 +142,6 @@ def get_captain_team(msgid, captain):
 
 
 def test():
-    print(get_player_team(234234234, 1))
+    print(get_player_team(123123123, 124))
+
+test()
