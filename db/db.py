@@ -124,34 +124,43 @@ def get_game(msgid):
         return i
 
 
+# def get_player_team(msgid, player):
+#
+
 def get_player_team(msgid, player):
-    b = game_col.aggregate([
-        {
-            '$match': {
-                '_id': msgid
-            }
-        },
-        {
-            '$replaceRoot': {
-                'newRoot': {
-                    '$first': {
-                        '$filter': {
-                            'input': '$teams',
-                            'as': 'team',
-                            'cond': {
-                                '$in': [
-                                    player,
-                                    '$$team.players'
-                                ]
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    ])
-    for i in b:
-        return i['name']
+    b = game_col.find_one({'_id': msgid})
+    
+    for team in b['teams']:
+        if player in team['players']:
+            return team['name']
+    
+    # b = game_col.aggregate([
+    #     {
+    #         '$match': {
+    #             '_id': msgid
+    #         }
+    #     },
+    #     {
+    #         '$replaceRoot': {
+    #             'newRoot': {
+    #                 '$first': {
+    #                     '$filter': {
+    #                         'input': '$teams',
+    #                         'as': 'team',
+    #                         'cond': {
+    #                             '$in': [
+    #                                 player,
+    #                                 '$$team.players'
+    #                             ]
+    #                         }
+    #                     }
+    #                 }
+    #             }
+    #         }
+    #     }
+    # ])
+    # for i in b:
+    #     return i['name']
 
 
 def get_team(msgid, team):
@@ -192,8 +201,8 @@ def get_captain_team(msgid, captain):
 def get_all_games():
     return [i for i in game_col.find({})]
 
-# def test():
-#     game = "4564564"
-#     print(remove_player(game, 'team_1', 210549105477287938))
-#
-# test()
+def test():
+    game = "222"
+    print(get_player_team(game, 703199010315305000))
+
+test()

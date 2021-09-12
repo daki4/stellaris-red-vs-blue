@@ -38,6 +38,7 @@ class NewGame(commands.Cog):
             # await captain_1.add_roles(ctx.message.guild.get_role(server['team_1_role']))
             # await captain_2.add_roles(ctx.message.guild.get_role(server['team_2_role']))
 
+
             embed = discord.Embed(title=f'{game["_id"]}')
             j = db.get_team(game_id, 'team_1')
             k = db.get_team(game_id, 'team_2')
@@ -53,7 +54,7 @@ class NewGame(commands.Cog):
             embed.add_field(name="Neutral:",   value='None ', inline=True)
             await ctx.send(embed=embed)
         except Exception as e:
-            print(e)
+            ctx.send(e)
 
 
     @commands.command(name="me",
@@ -63,8 +64,13 @@ class NewGame(commands.Cog):
     @commands.has_permissions()
     async def me(self, ctx, player: discord.Member, game):
         try:
-            team = db.get_captain_team(game, ctx.message.author.id)
             db_game = db.get_game(game)
+            team = db.get_captain_team(game, ctx.message.author.id)
+            pl_t = db.get_player_team(game, player.id)
+            print(pl_t)
+            if pl_t in ['team_1', 'team_2', 'neutral']:
+                await ctx.send(f'player <@{player.id}> has already been picked ')
+            else:
             # if team in ['team_1', 'team_2']:
             #     db.add_player(game, team, player.id)
             #     guild = db.get_server(ctx.message.guild.id)
@@ -79,11 +85,15 @@ class NewGame(commands.Cog):
             #     teamed_players = [j for i in db.get_all_teamed_players(game) for j in i]
             #     [players.remove(i) if i in players else None for i in teamed_players]
 
-            if team in ['team_1', 'team_2']:
-                db.add_player(game, team, player.id)
-                db.remove_start_player(game, player.id)
-                await ctx.send(f"accepted <@{player.id}> on {'team red' if team == 'team_1' else 'team blue' if team == 'team_2' else 'neutral'}")
+                if team in ['team_1', 'team_2']:
+                    db.add_player(game, team, player.id)
+                    db.remove_start_player(game, player.id)
+                    await ctx.send(f"accepted <@{player.id}> on {'team red' if team == 'team_1' else 'team blue' if team == 'team_2' else 'neutral'}")
 
+                else:
+                    await ctx.send(f'you are not a captain in the game you mentioned.')
+                db_game = db.get_game(game)
+                time.sleep(2)
                 embed = discord.Embed(title=f'{db_game["_id"]}')
                 j = db.get_team(db_game['_id'], 'team_1')
                 k = db.get_team(db_game['_id'], 'team_2')
@@ -97,10 +107,8 @@ class NewGame(commands.Cog):
                 # embed.add_field(name="Neutral:",
                 #                 value=' '.join([f' <@{i}>' if len(l) > 0 else "." for i in l]), inline=True)
                 await ctx.send(embed=embed)
-            else:
-                await ctx.send(f'you are not a captain in the game you mentioned.')
         except Exception as e:
-            await ctx.send(e)
+            print(e)
 
 
     @commands.command(name="remove",
@@ -110,28 +118,28 @@ class NewGame(commands.Cog):
     @commands.has_permissions()
     async def remove(self, ctx, player: discord.Member, game):
         print(player.id)
-            # async def embedstuff():
-            #     db_game = db.get_game(game)
-            #     embed = discord.Embed(title=f'{db_game["_id"]}')
-            #     j = db.get_team(db_game['_id'], 'team_1')
-            #     k = db.get_team(db_game['_id'], 'team_2')
-            #     l = db.get_team(db_game['_id'], 'neutral')
-            #
-            #     embed.add_field(name='free players:', value=' '.join(f' <@{i}>' for i in db_game['initial_players']),
-            #                     inline=False)
-            #     embed.add_field(name="Red team:",
-            #                     value=' '.join([f' <@{i}>' if len(j) > 0 else "." for i in j]), inline=False)
-            #     embed.add_field(name="Blue team:",
-            #                     value=' '.join([f' <@{i}>' if len(k) > 0 else "." for i in k]), inline=False)
-            # embed.add_field(name="Neutral:",
-            #                 value=' '.join([f' <@{i}>' if len(l) > 0 else "." for i in l]), inline=True)
-            # await ctx.send(embed=embed)
+        async def embedstuff():
+            db_game = db.get_game(game)
+            embed = discord.Embed(title=f'{db_game["_id"]}')
+            j = db.get_team(db_game['_id'], 'team_1')
+            k = db.get_team(db_game['_id'], 'team_2')
+            l = db.get_team(db_game['_id'], 'neutral')
+
+            embed.add_field(name='free players:', value=' '.join(f' <@{i}>' for i in db_game['initial_players']),
+                            inline=False)
+            embed.add_field(name="Red team:",
+                            value=' '.join([f' <@{i}>' if len(j) > 0 else "." for i in j]), inline=False)
+            embed.add_field(name="Blue team:",
+                            value=' '.join([f' <@{i}>' if len(k) > 0 else "." for i in k]), inline=False)
+            embed.add_field(name="Neutral:",
+                        value=' '.join([f' <@{i}>' if len(l) > 0 else "." for i in l]), inline=True)
+            await ctx.send(embed=embed)
         if ctx.message.author.id == db.get_host(game):
             print(db.get_player_team(game, player.id))
             a = db.get_player_team(game, player.id)
             if a is None:
                 db.remove_start_player(game, player.id)
-                # await embedstuff()
+                await embedstuff()
                 await ctx.send(f"removed: <@{player.id}")
             else:
                 db.remove_player(game, a, player.id)
@@ -139,7 +147,7 @@ class NewGame(commands.Cog):
                     db.remove_start_player(game, player.id)
                 except Exception as e:
                     print(e)
-                # await embedstuff()
+                await embedstuff()
                 await ctx.send(f"removed: <@{player.id}>")
         else:
             await ctx.send(f'you arent the host of this game')
