@@ -1,4 +1,3 @@
-from discord import player
 import pymongo
 import time
 
@@ -22,10 +21,11 @@ game_col = db['games']
 #             'gamemaster_role': gm_role
 #         })
 
-def setup_server(serverid, gather_spot):
+def setup_server(serverid, bot_channel, gather_spot):
     server_col.insert_one(
         {
             '_id': serverid,
+            'bot_channel': bot_channel,
             'gathering_spot': gather_spot
         })
 
@@ -53,14 +53,8 @@ def new_game(msgid, guild, host, captain_1, captain_2, starting_players):
                                  'name': 'team_2',
                                  'captain': captain_2,
                                  'players': [captain_2]
-                             },
-                             {
-                                 'name': 'neutral',
-                                 'players': []
-                             }],
+                             }]
                          })
-    # add_player(msgid, 'team_1', captain_1)
-    # add_player(msgid, 'team_2', captain_2)
 
 
 def add_player(msgid, team, player):
@@ -133,34 +127,6 @@ def get_player_team(msgid, player):
     for team in b['teams']:
         if player in team['players']:
             return team['name']
-    
-    # b = game_col.aggregate([
-    #     {
-    #         '$match': {
-    #             '_id': msgid
-    #         }
-    #     },
-    #     {
-    #         '$replaceRoot': {
-    #             'newRoot': {
-    #                 '$first': {
-    #                     '$filter': {
-    #                         'input': '$teams',
-    #                         'as': 'team',
-    #                         'cond': {
-    #                             '$in': [
-    #                                 player,
-    #                                 '$$team.players'
-    #                             ]
-    #                         }
-    #                     }
-    #                 }
-    #             }
-    #         }
-    #     }
-    # ])
-    # for i in b:
-    #     return i['name']
 
 
 def get_team(msgid, team):
@@ -201,8 +167,8 @@ def get_captain_team(msgid, captain):
 def get_all_games():
     return [i for i in game_col.find({})]
 
-def test():
-    game = "222"
-    print(get_player_team(game, 703199010315305000))
+# def test():
+#     game = "222"
+#     print(get_player_team(game, 703199010315305000))
 
-test()
+# test()

@@ -36,9 +36,9 @@ class Setup(commands.Cog):
                     team locations (red & blue teams)")
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
-    async def set_up(self, ctx, gathering_channel: discord.VoiceChannel):
+    async def set_up(self, ctx, bot_channel: discord.TextChannel, gathering_channel: discord.VoiceChannel):
         try:
-            db.setup_server(ctx.message.guild.id, gathering_channel.id)
+            db.setup_server(ctx.message.guild.id, bot_channel.id, gathering_channel.id)
             await ctx.send(f'setup complete! you can use the {await self.bot.get_prefix(ctx.message)}help to see how to proceed')
         except Exception as e:
             await ctx.send(f'setup failed. Message DAKI4#1002 if setup fails again.')
